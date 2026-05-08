@@ -89,3 +89,9 @@ transcripts/
 *.webm
 *.srt
 *.vtt
+
+# Project-local docs not for the repo
+SUBMISSION.md
+DEV.md
+hackathon_rules.md
+CLAUDE.md
