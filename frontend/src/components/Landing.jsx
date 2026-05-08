@@ -20,7 +20,7 @@ export default function Landing({ onStart }) {
     <>
       <ScrollExpandHero
         mediaSrc="/animated.mp4"
-        bgImageSrc="/animated.mp4"
+        bgImageSrc=""
         title="Health misinformation kills."
         date="Beacon"
         scrollToExpand="Scroll to expand"

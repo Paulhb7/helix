@@ -166,19 +166,6 @@ export default function ScrollExpandHero({
                     className="seh-media-overlay"
                     style={{ opacity: 0.5 - scrollProgress * 0.3 }}
                   />
-                  {mediaFullyExpanded && onStart && (
-                    <button
-                      type="button"
-                      className="seh-glass-btn"
-                      onClick={onStart}
-                    >
-                      Start checking
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    </button>
-                  )}
                 </div>
 
                 {/* Date & scroll hint below media */}
@@ -217,6 +204,20 @@ export default function ScrollExpandHero({
                   {restOfTitle}
                 </h2>
               </div>
+
+              {mediaFullyExpanded && onStart && (
+                <button
+                  type="button"
+                  className="seh-glass-btn"
+                  onClick={onStart}
+                >
+                  Start checking
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+              )}
             </div>
 
           </div>
