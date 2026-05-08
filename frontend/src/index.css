@@ -158,12 +158,12 @@ main {
   display: block;
 }
 .seh-bg-dark {
-  background: linear-gradient(135deg, #0a1628 0%, #0f172a 40%, #1a1a2e 100%);
+  background: #ffffff;
 }
 .seh-bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Container */
@@ -222,6 +222,41 @@ main {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+/* Glass CTA button centered on video */
+.seh-glass-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s;
+  animation: seh-glass-fade-in 0.5s ease-out;
+}
+.seh-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+@keyframes seh-glass-fade-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 /* Labels below media */
@@ -236,11 +271,11 @@ main {
 }
 .seh-label-date {
   font-size: 24px;
-  color: rgba(191, 219, 254, 0.85);
+  color: rgba(191, 219, 254, 0.9);
   margin: 0;
 }
 .seh-label-scroll {
-  color: rgba(191, 219, 254, 0.85);
+  color: rgba(191, 219, 254, 0.9);
   font-weight: 500;
   text-align: center;
   margin: 0;
@@ -259,7 +294,7 @@ main {
   flex-direction: column;
 }
 .seh-title-group.seh-blend {
-  mix-blend-mode: difference;
+  mix-blend-mode: normal;
 }
 .seh-title-line {
   font-size: clamp(36px, 6vw, 64px);

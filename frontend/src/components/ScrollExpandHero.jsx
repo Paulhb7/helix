@@ -8,6 +8,7 @@ export default function ScrollExpandHero({
   date,
   scrollToExpand,
   textBlend,
+  onStart,
   children,
 }) {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -16,6 +17,7 @@ export default function ScrollExpandHero({
   const [touchStartY, setTouchStartY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     setScrollProgress(0);
@@ -24,9 +26,18 @@ export default function ScrollExpandHero({
   }, [mediaSrc]);
 
   useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, [mediaSrc]);
+
+  useEffect(() => {
     const handleWheel = (e) => {
       if (mediaFullyExpanded && e.deltaY < 0 && window.scrollY <= 5) {
         setMediaFullyExpanded(false);
+        e.preventDefault();
+      } else if (mediaFullyExpanded) {
         e.preventDefault();
       } else if (!mediaFullyExpanded) {
         e.preventDefault();
@@ -54,6 +65,8 @@ export default function ScrollExpandHero({
 
       if (mediaFullyExpanded && deltaY < -20 && window.scrollY <= 5) {
         setMediaFullyExpanded(false);
+        e.preventDefault();
+      } else if (mediaFullyExpanded) {
         e.preventDefault();
       } else if (!mediaFullyExpanded) {
         e.preventDefault();
@@ -138,6 +151,7 @@ export default function ScrollExpandHero({
               >
                 <div className="seh-media-inner">
                   <video
+                    ref={videoRef}
                     src={mediaSrc}
                     poster={posterSrc}
                     autoPlay
@@ -152,6 +166,19 @@ export default function ScrollExpandHero({
                     className="seh-media-overlay"
                     style={{ opacity: 0.5 - scrollProgress * 0.3 }}
                   />
+                  {mediaFullyExpanded && onStart && (
+                    <button
+                      type="button"
+                      className="seh-glass-btn"
+                      onClick={onStart}
+                    >
+                      Start checking
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 {/* Date & scroll hint below media */}
@@ -192,13 +219,6 @@ export default function ScrollExpandHero({
               </div>
             </div>
 
-            {/* Children content after full expansion */}
-            <section
-              className="seh-content"
-              style={{ opacity: showContent ? 1 : 0 }}
-            >
-              {children}
-            </section>
           </div>
         </div>
       </section>

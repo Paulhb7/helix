@@ -105,9 +105,7 @@ export default function App() {
   if (view === 'landing') {
     return (
       <>
-        <Header onNavigate={navigate} transparent />
         <Landing onStart={() => setView('app')} />
-        <Footer />
       </>
     );
   }
