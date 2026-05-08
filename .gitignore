@@ -1,0 +1,91 @@
+# Environments / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Virtual envs
+.venv/
+venv/
+env/
+.python-version
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+.installed.cfg
+site/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+.hypothesis/
+
+# Type checkers / linters
+.mypy_cache/
+.pyright/
+.pyre/
+.ruff_cache/
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dependency managers
+uv.lock
+.uv-cache/
+
+# Node (in case static/ grows)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / local data
+*.log
+logs/
+*.sqlite
+*.sqlite3
+*.db
+
+# Local runtime artifacts
+data/
+tmp/
+temp/
+downloads/
+uploads/
+transcripts/
+
+# Media generated during ingestion experiments
+*.mp3
+*.mp4
+*.m4a
+*.wav
+*.webm
+*.srt
+*.vtt
