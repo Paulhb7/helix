@@ -1,6 +1,6 @@
-export default function Header({ onNavigate }) {
+export default function Header({ onNavigate, transparent }) {
   return (
-    <header className="site-header">
+    <header className={`site-header${transparent ? ' site-header--transparent' : ''}`}>
       <a href="#" className="wordmark" onClick={(e) => { e.preventDefault(); onNavigate('landing'); }}>
         <span className="dot" />
         <span>Beacon</span>
