@@ -455,7 +455,7 @@ main.has-helix-bg {
 /* Glass CTA button centered on video */
 .seh-glass-btn {
   position: absolute;
-  top: 50%;
+  top: 82%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 30;
@@ -479,8 +479,7 @@ main.has-helix-bg {
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
     inset 0 -1px 0 rgba(0, 0, 0, 0.14),
     0 12px 36px rgba(0, 54, 41, 0.32);
-  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
-  animation: seh-glass-fade-in 0.5s ease-out;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s, opacity 0.2s ease;
 }
 .seh-glass-btn:hover {
   background: linear-gradient(180deg, color-mix(in oklab, var(--primary-container) 90%, white 10%) 0%, var(--primary-container) 100%);
@@ -591,8 +590,8 @@ main.has-helix-bg {
 .seh-stats {
   position: absolute;
   left: 50%;
-  bottom: 14%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 16;
   list-style: none;
   margin: 0;
@@ -605,7 +604,6 @@ main.has-helix-bg {
   transition: opacity 0.15s ease;
 }
 @media (max-height: 760px) {
-  .seh-stats { bottom: 8%; }
   .seh-stat { padding: 9px 11px 8px; }
   .seh-stat-number { font-size: clamp(22px, 2.6vw, 30px); }
   .seh-stat-label { font-size: 12px; }

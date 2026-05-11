@@ -115,6 +115,12 @@ export default function ScrollExpandHero({
   const restOfTitle = title ? title.split(' ').slice(1).join(' ') : '';
   const titleFade = Math.max(0, 1 - scrollProgress * 1.6);
   const titleLift = scrollProgress * (isMobile ? -24 : -40);
+  // Stats + Start button reveal together once the user starts scrolling.
+  // They fade in from 0.25 → 0.55 progress and remain visible thereafter.
+  const reveal = scrollProgress < 0.25
+    ? 0
+    : Math.min(1, (scrollProgress - 0.25) / 0.3);
+  const statsLift = (1 - reveal) * 18;
 
   return (
     <div className="seh-root">
@@ -153,7 +159,11 @@ export default function ScrollExpandHero({
                 <ul
                   className="seh-stats"
                   aria-label="Why this matters"
-                  style={{ opacity: titleFade }}
+                  style={{
+                    opacity: reveal,
+                    transform: `translate(-50%, calc(-50% + ${statsLift}px))`,
+                    visibility: reveal > 0.01 ? 'visible' : 'hidden',
+                  }}
                 >
                   {stats.map((s, i) => (
                     <li key={i} className="seh-stat">
@@ -208,21 +218,26 @@ export default function ScrollExpandHero({
                 </div>
               </div>
 
-              {mediaFullyExpanded && onStart && (
+              {onStart && reveal > 0.01 && (
                 <button
                   type="button"
                   className="seh-glass-btn"
                   onClick={onStart}
+                  style={{
+                    opacity: reveal,
+                    visibility: reveal > 0.01 ? 'visible' : 'hidden',
+                    pointerEvents: reveal > 0.6 ? 'auto' : 'none',
+                  }}
                 >
                   <span>Start checking</span>
                   <span className="material-symbols-outlined sm" aria-hidden="true">arrow_forward</span>
                 </button>
               )}
 
-              {!mediaFullyExpanded && !(stats && stats.length > 0) && (
+              {!mediaFullyExpanded && (
                 <div
                   className="seh-scroll-hint"
-                  style={{ opacity: Math.max(0, 1 - scrollProgress * 2.2) }}
+                  style={{ opacity: Math.max(0, 1 - scrollProgress * 5) }}
                   aria-hidden="true"
                 >
                   <span className="seh-scroll-hint-text">Scroll to expand</span>
