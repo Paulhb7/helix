@@ -9,19 +9,15 @@ export default function ScrollExpandHero({
   scrollToExpand,
   textBlend,
   onStart,
-  children,
 }) {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [showContent, setShowContent] = useState(false);
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
   const [touchStartY, setTouchStartY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const sectionRef = useRef(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
     setScrollProgress(0);
-    setShowContent(false);
     setMediaFullyExpanded(false);
   }, [mediaSrc]);
 
@@ -47,9 +43,6 @@ export default function ScrollExpandHero({
 
         if (newProgress >= 1) {
           setMediaFullyExpanded(true);
-          setShowContent(true);
-        } else if (newProgress < 0.75) {
-          setShowContent(false);
         }
       }
     };
@@ -77,9 +70,6 @@ export default function ScrollExpandHero({
 
         if (newProgress >= 1) {
           setMediaFullyExpanded(true);
-          setShowContent(true);
-        } else if (newProgress < 0.75) {
-          setShowContent(false);
         }
         setTouchStartY(touchY);
       }
@@ -113,15 +103,20 @@ export default function ScrollExpandHero({
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const mediaWidth = 300 + scrollProgress * (isMobile ? 650 : 1250);
-  const mediaHeight = 400 + scrollProgress * (isMobile ? 200 : 400);
-  const textTranslateX = scrollProgress * (isMobile ? 180 : 150);
+  // Source video is 1920x1080 (16:9). Cap final size to native resolution so we
+  // never upscale — keeps the expansion animation but the final frame stays sharp.
+  const startW = isMobile ? 440 : 700;
+  const finalW = isMobile ? 1080 : 1920;
+  const mediaWidth = startW + scrollProgress * (finalW - startW);
+  const mediaHeight = Math.round(mediaWidth * 9 / 16);
 
   const firstWord = title ? title.split(' ')[0] : '';
   const restOfTitle = title ? title.split(' ').slice(1).join(' ') : '';
+  const titleFade = Math.max(0, 1 - scrollProgress * 1.6);
+  const titleLift = scrollProgress * (isMobile ? -24 : -40);
 
   return (
-    <div ref={sectionRef} className="seh-root">
+    <div className="seh-root">
       <section className="seh-section">
         <div className="seh-wrapper">
           {/* Background layer */}
@@ -139,6 +134,20 @@ export default function ScrollExpandHero({
 
           <div className="seh-container">
             <div className="seh-viewport">
+              {/* Eyebrow + headline above the video */}
+              <div
+                className={`seh-headline${textBlend ? ' seh-blend' : ''}`}
+                style={{
+                  opacity: titleFade,
+                  transform: `translate(-50%, calc(-50% + ${titleLift}px))`,
+                }}
+              >
+                {date && <p className="seh-eyebrow">{date}</p>}
+                <h1 className="seh-title">
+                  {firstWord} <em>{restOfTitle}</em>
+                </h1>
+              </div>
+
               {/* Expanding media */}
               <div
                 className="seh-media-frame"
@@ -167,42 +176,6 @@ export default function ScrollExpandHero({
                     style={{ opacity: 0.5 - scrollProgress * 0.3 }}
                   />
                 </div>
-
-                {/* Date & scroll hint below media */}
-                <div className="seh-media-labels">
-                  {date && (
-                    <p
-                      className="seh-label-date"
-                      style={{ transform: `translateX(-${textTranslateX}vw)` }}
-                    >
-                      {date}
-                    </p>
-                  )}
-                  {scrollToExpand && (
-                    <p
-                      className="seh-label-scroll"
-                      style={{ transform: `translateX(${textTranslateX}vw)` }}
-                    >
-                      {scrollToExpand}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Title split across two lines */}
-              <div className={`seh-title-group${textBlend ? ' seh-blend' : ''}`}>
-                <h2
-                  className="seh-title-line"
-                  style={{ transform: `translateX(-${textTranslateX}vw)` }}
-                >
-                  {firstWord}
-                </h2>
-                <h2
-                  className="seh-title-line"
-                  style={{ transform: `translateX(${textTranslateX}vw)` }}
-                >
-                  {restOfTitle}
-                </h2>
               </div>
 
               {mediaFullyExpanded && onStart && (
@@ -211,12 +184,26 @@ export default function ScrollExpandHero({
                   className="seh-glass-btn"
                   onClick={onStart}
                 >
-                  Start checking
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
+                  <span>Start checking</span>
+                  <span className="material-symbols-outlined sm" aria-hidden="true">arrow_forward</span>
                 </button>
+              )}
+
+              {!mediaFullyExpanded && (
+                <div
+                  className="seh-scroll-hint"
+                  style={{ opacity: Math.max(0, 1 - scrollProgress * 2.2) }}
+                  aria-hidden="true"
+                >
+                  <span className="seh-scroll-hint-text">Scroll to expand</span>
+                  <span className="material-symbols-outlined seh-scroll-hint-arrow">arrow_downward</span>
+                </div>
+              )}
+
+              {scrollToExpand && (
+                <p className="seh-label-scroll" aria-hidden="true">
+                  {scrollToExpand}
+                </p>
               )}
             </div>
 

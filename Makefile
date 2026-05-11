@@ -13,7 +13,7 @@ ollama-pull:
 	ollama pull gemma4:e2b
 
 dev:
-	$(VENV)/bin/uvicorn beacon.api.main:app --reload --host $${BACKEND_HOST:-0.0.0.0} --port $${BACKEND_PORT:-8003}
+	$(VENV)/bin/uvicorn helix.api.main:app --reload --host $${BACKEND_HOST:-0.0.0.0} --port $${BACKEND_PORT:-8003}
 
 test:
 	$(VENV)/bin/pytest -v

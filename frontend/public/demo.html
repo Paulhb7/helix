@@ -1,0 +1,1161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Helix — 3-min demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap" />
+    <style>
+      :root {
+        --surface: oklch(0.955 0.013 165);
+        --surface-container-lowest: #ffffff;
+        --surface-container-low: oklch(0.975 0.008 160);
+        --surface-container: oklch(0.945 0.013 162);
+        --on-surface: #191c1d;
+        --on-surface-variant: #404945;
+        --outline: #707974;
+        --outline-variant: #c0c9c3;
+        --primary: #003629;
+        --primary-container: #1b4d3e;
+        --on-primary: #ffffff;
+        --primary-fixed-dim: #9ed1bd;
+        --secondary: #8d4864;
+        --error: #ba1a1a;
+        --tertiary: #372845;
+
+        --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-serif: "Instrument Serif", "Playfair Display", Georgia, serif;
+        --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body { height: 100%; overflow: hidden; }
+      body {
+        background: var(--surface);
+        background-image: radial-gradient(circle at 2px 2px, rgba(27, 77, 62, 0.07) 1px, transparent 0);
+        background-size: 24px 24px;
+        color: var(--on-surface);
+        font-family: var(--font-sans);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .material-symbols-outlined {
+        font-family: "Material Symbols Outlined";
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: normal;
+        text-transform: none;
+        font-feature-settings: "liga";
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .material-symbols-outlined.sm { font-size: 18px; }
+      .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+      /* ---- Site header strip (so it always looks like the Helix product) ---- */
+      .site-header {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 100;
+        background: oklch(0.955 0.013 165 / 0.78);
+        backdrop-filter: blur(14px) saturate(1.15);
+        -webkit-backdrop-filter: blur(14px) saturate(1.15);
+        border-bottom: 1px solid rgba(192, 201, 195, 0.4);
+      }
+      .site-header-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 14px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .wordmark {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--primary);
+        line-height: 1;
+      }
+      .wordmark-mark {
+        width: 32px; height: 32px;
+        border-radius: 9px;
+        background: rgba(27, 77, 62, 0.1);
+        color: var(--primary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .wordmark-mark .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+      .wordmark-text {
+        font-family: var(--font-serif);
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .topnav {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        font-size: 14px;
+      }
+      .topnav a {
+        color: var(--on-surface-variant);
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .topnav .nav-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        color: var(--primary);
+        font-size: 12.5px;
+        font-weight: 600;
+        background: rgba(27, 77, 62, 0.08);
+        border: 1px solid rgba(27, 77, 62, 0.18);
+      }
+      .nav-cta-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        animation: pulse 2.2s ease-in-out infinite;
+      }
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+      /* ---- Slide system ---- */
+      .deck {
+        position: fixed;
+        inset: 0;
+        padding-top: 68px;
+      }
+      .slide {
+        position: absolute;
+        inset: 68px 0 0 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 48px 80px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.55s ease;
+        overflow: auto;
+      }
+      .slide.is-active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .slide-inner {
+        max-width: 1100px;
+        width: 100%;
+        text-align: center;
+      }
+      .slide-inner.left { text-align: left; }
+
+      /* Editorial typography */
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+        margin-bottom: 18px;
+      }
+      .display-title {
+        font-family: var(--font-serif);
+        font-size: clamp(48px, 6.5vw, 96px);
+        font-weight: 400;
+        line-height: 1.02;
+        letter-spacing: -0.022em;
+        color: var(--on-surface);
+        text-wrap: balance;
+      }
+      .display-title em {
+        font-style: italic;
+        color: var(--primary-container);
+      }
+      .display-subtitle {
+        margin-top: 28px;
+        font-family: var(--font-sans);
+        font-size: clamp(17px, 1.5vw, 22px);
+        line-height: 1.5;
+        color: var(--on-surface-variant);
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+        text-wrap: pretty;
+      }
+      .display-subtitle em { font-family: var(--font-serif); font-style: italic; color: var(--on-surface); font-size: 1.05em; }
+
+      .stat-huge {
+        font-family: var(--font-serif);
+        font-size: clamp(96px, 14vw, 200px);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--primary);
+      }
+      .stat-suffix { color: var(--primary-container); font-style: italic; }
+      .stat-caption {
+        margin-top: 24px;
+        font-size: clamp(18px, 1.4vw, 22px);
+        line-height: 1.45;
+        color: var(--on-surface);
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+        text-wrap: pretty;
+      }
+      .stat-citation {
+        margin-top: 18px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+      }
+
+      /* Supporting evidence under the problem title */
+      .stat-footnote {
+        margin: 40px auto 0;
+        max-width: 720px;
+        padding: 22px 28px;
+        border-left: 3px solid var(--primary-container);
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(10px) saturate(1.1);
+        -webkit-backdrop-filter: blur(10px) saturate(1.1);
+        border-radius: 0 14px 14px 0;
+        text-align: left;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 24px;
+        row-gap: 6px;
+        align-items: baseline;
+      }
+      .stat-footnote-number {
+        font-family: var(--font-serif);
+        font-size: clamp(56px, 6vw, 84px);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--primary);
+        grid-row: 1 / span 2;
+      }
+      .stat-footnote-text {
+        font-size: 15px;
+        line-height: 1.45;
+        color: var(--on-surface);
+      }
+      .stat-footnote-text em { font-style: italic; color: var(--primary-container); }
+      .stat-footnote .stat-citation { margin-top: 0; }
+
+      /* Pill row for "who's most exposed" */
+      .pill-row {
+        margin-top: 38px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+      .pill-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px) saturate(1.1);
+        -webkit-backdrop-filter: blur(10px) saturate(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 10px rgba(27, 77, 62, 0.06);
+        font-size: 15px;
+        color: var(--on-surface);
+        font-weight: 500;
+      }
+      .pill-chip .material-symbols-outlined { color: var(--primary); font-size: 18px; }
+
+      /* Pipeline diagram for slide 5 */
+      .pipeline-row {
+        margin-top: 48px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: center;
+        gap: 16px;
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .pipeline-card {
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(12px) saturate(1.1);
+        -webkit-backdrop-filter: blur(12px) saturate(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 14px;
+        padding: 22px 18px;
+        text-align: center;
+        box-shadow: 0 4px 24px rgba(27, 77, 62, 0.05);
+      }
+      .pipeline-card .material-symbols-outlined {
+        color: var(--primary);
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+      .pipeline-card-label {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+      }
+      .pipeline-card-title {
+        margin-top: 6px;
+        font-family: var(--font-serif);
+        font-size: 22px;
+        color: var(--on-surface);
+        letter-spacing: -0.01em;
+      }
+      .pipeline-arrow {
+        color: var(--outline);
+        font-size: 24px;
+      }
+
+      /* ---- Platform-feel cards (slides 6/7/8) ---- */
+      .helix-check-intro {
+        max-width: 940px;
+        margin: 0 auto 28px;
+        text-align: center;
+      }
+      .helix-title-card {
+        font-family: var(--font-serif);
+        font-size: clamp(28px, 3.4vw, 44px);
+        line-height: 1.05;
+        letter-spacing: -0.022em;
+        font-weight: 400;
+        color: var(--on-surface);
+        margin-bottom: 12px;
+        text-wrap: pretty;
+      }
+      .helix-title-card em { font-style: italic; color: var(--primary-container); }
+      .helix-intro-text {
+        font-size: 15px;
+        color: var(--on-surface-variant);
+        max-width: 720px;
+        margin: 0 auto;
+        text-wrap: pretty;
+      }
+      .helix-intro-text em { font-style: italic; color: var(--primary-container); }
+
+      .helix-card {
+        background: var(--surface-container-lowest);
+        border: 1px solid var(--outline-variant);
+        border-radius: 18px;
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        box-shadow: 0 1px 0 rgba(255,255,255,0.6), 0 14px 32px -22px rgba(15, 23, 42, 0.18);
+        width: 100%;
+        max-width: 940px;
+        margin: 0 auto;
+      }
+      .helix-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .helix-tabs {
+        display: inline-flex;
+        gap: 2px;
+        padding: 4px;
+        background: var(--surface-container-low);
+        border: 1px solid var(--outline-variant);
+        border-radius: 10px;
+      }
+      .helix-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border: 0;
+        background: transparent;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--on-surface-variant);
+        font-family: inherit;
+      }
+      .helix-tab.is-active {
+        background: var(--surface-container-lowest);
+        color: var(--on-surface);
+        box-shadow: 0 1px 0 var(--outline-variant);
+      }
+      .helix-tab .material-symbols-outlined { font-size: 16px; }
+
+      .helix-input-wrap { position: relative; }
+      .helix-input {
+        width: 100%;
+        padding: 14px 16px 14px 132px;
+        background: var(--surface-container-lowest);
+        border: 1px solid var(--outline-variant);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--on-surface);
+      }
+      .helix-detect-chip {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--surface);
+        border: 1px solid var(--outline);
+        color: var(--primary-container);
+      }
+      .helix-detect-chip .material-symbols-outlined { font-size: 14px; }
+
+      .link-preview {
+        display: grid;
+        grid-template-columns: 108px 1fr;
+        gap: 16px;
+        padding: 12px;
+        background: var(--surface-container-low);
+        border: 1px solid var(--outline-variant);
+        border-radius: 12px;
+      }
+      .link-preview-thumb {
+        background: linear-gradient(135deg, #0f172a, #1b4d3e);
+        border-radius: 8px;
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.8);
+      }
+      .link-preview-thumb .material-symbols-outlined { font-size: 38px; }
+      .link-preview-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+      }
+      .preview-kicker {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .preview-kicker .material-symbols-outlined { font-size: 13px; }
+      .preview-title {
+        font-family: var(--font-serif);
+        font-size: 17px;
+        color: var(--on-surface);
+        letter-spacing: -0.01em;
+      }
+      .preview-desc {
+        font-size: 12.5px;
+        color: var(--on-surface-variant);
+        line-height: 1.45;
+      }
+
+      .helix-card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--outline-variant);
+        padding-top: 14px;
+      }
+      .source-dots {
+        display: inline-flex;
+        gap: 16px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+      }
+      .source-dots span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .source-dots i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary-fixed-dim);
+      }
+      .helix-launch {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(180deg, color-mix(in oklab, var(--on-surface) 88%, white 12%) 0%, var(--on-surface) 100%);
+        color: var(--surface-container-lowest);
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.18), 0 4px 14px rgba(15,23,42,0.18);
+      }
+      .helix-launch .material-symbols-outlined { font-size: 16px; }
+
+      /* Agent loader (slide 7) */
+      .agent-stack {
+        max-width: 720px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .agent-stack > p {
+        font-size: 15px;
+        color: var(--on-surface-variant);
+        margin-bottom: 28px;
+      }
+      .agent-plan {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--outline-variant);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 14px 32px -22px rgba(15,23,42,0.18);
+      }
+      .agent-plan-step {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.5);
+        text-align: left;
+      }
+      .agent-plan-step.active { background: rgba(27, 77, 62, 0.06); }
+      .agent-plan-step.done { opacity: 0.7; }
+      .agent-plan-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: var(--surface-container);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .agent-plan-step.active .agent-plan-icon {
+        background: var(--primary);
+        color: var(--on-primary);
+        animation: spin 2s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .agent-plan-step.done .agent-plan-icon { background: var(--primary-fixed-dim); color: var(--primary); }
+      .agent-plan-step strong {
+        font-size: 15px;
+        color: var(--on-surface);
+        display: block;
+      }
+      .agent-plan-detail {
+        font-size: 13px;
+        color: var(--on-surface-variant);
+        margin-top: 2px;
+      }
+      .agent-plan-badge {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      .agent-plan-step.active .agent-plan-badge { background: var(--primary); color: var(--on-primary); }
+      .agent-plan-step.done .agent-plan-badge { background: rgba(27,77,62,0.12); color: var(--primary-container); }
+      .agent-plan-step.pending .agent-plan-badge { background: rgba(0,0,0,0.05); color: var(--on-surface-variant); }
+
+      /* Verdict card (slide 8) */
+      .verdict-shell {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 20px;
+        text-align: left;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(12px) saturate(1.1);
+        -webkit-backdrop-filter: blur(12px) saturate(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 14px;
+        box-shadow: 0 4px 24px rgba(27, 77, 62, 0.05);
+      }
+      .claim-card {
+        padding: 24px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        border-left: 4px solid var(--error);
+      }
+      .band-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 600;
+        width: fit-content;
+        background: rgba(186, 26, 26, 0.12);
+        color: var(--error);
+      }
+      .band-pill .material-symbols-outlined { font-size: 14px; }
+      .claim-title {
+        font-family: var(--font-serif);
+        font-size: 22px;
+        line-height: 1.3;
+        color: var(--on-surface);
+        letter-spacing: -0.015em;
+      }
+      .claim-narrative {
+        font-size: 14px;
+        color: var(--on-surface-variant);
+        line-height: 1.55;
+      }
+      .veracity-scale {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .veracity-labels {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--outline);
+      }
+      .veracity-bar {
+        position: relative;
+        height: 14px;
+        border-radius: 999px;
+        background: linear-gradient(to right, var(--error) 0%, var(--secondary) 35%, var(--primary-fixed-dim) 70%, var(--primary-container) 100%);
+      }
+      .veracity-cursor {
+        position: absolute;
+        top: 50%;
+        left: 18%;
+        transform: translate(-50%, -50%);
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: var(--surface-container-lowest);
+        border: 3px solid var(--error);
+        box-shadow: 0 2px 8px rgba(186,26,26,0.3);
+      }
+
+      .source-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .source-card {
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .source-card-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .source-card-head .material-symbols-outlined {
+        color: var(--primary);
+        font-size: 22px;
+      }
+      .source-card-name {
+        font-family: var(--font-serif);
+        font-size: 17px;
+        color: var(--on-surface);
+      }
+      .source-card-badge {
+        margin-left: auto;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--primary-container);
+        background: rgba(27, 77, 62, 0.08);
+        padding: 3px 8px;
+        border-radius: 999px;
+      }
+      .source-card-quote {
+        font-size: 12.5px;
+        color: var(--on-surface-variant);
+        line-height: 1.5;
+        margin-top: 6px;
+      }
+
+      /* Sources logos slide */
+      .logo-row {
+        margin-top: 42px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 36px;
+        flex-wrap: wrap;
+      }
+      .logo-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 28px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.4);
+        box-shadow: 0 4px 24px rgba(27,77,62,0.05);
+      }
+      .logo-pill .material-symbols-outlined {
+        color: var(--primary);
+        font-size: 32px;
+      }
+      .logo-pill-text {
+        text-align: left;
+      }
+      .logo-pill-text strong {
+        font-family: var(--font-serif);
+        font-size: 22px;
+        color: var(--on-surface);
+        letter-spacing: -0.015em;
+        display: block;
+        font-weight: 400;
+      }
+      .logo-pill-text span {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
+      }
+
+      /* Closing slide */
+      .closing-mark {
+        font-family: var(--font-serif);
+        font-size: clamp(96px, 14vw, 180px);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+
+      /* ---- Deck nav ---- */
+      .deck-nav {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 16px;
+        background: rgba(255,255,255,0.62);
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 999px;
+        backdrop-filter: blur(14px) saturate(1.1);
+        -webkit-backdrop-filter: blur(14px) saturate(1.1);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 8px 28px rgba(27,77,62,0.08);
+      }
+      .deck-nav button {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        color: var(--on-surface-variant);
+        padding: 4px;
+        cursor: pointer;
+        display: inline-flex;
+      }
+      .deck-nav button:hover { color: var(--primary); }
+      .deck-nav .material-symbols-outlined { font-size: 20px; }
+      .deck-dots {
+        display: inline-flex;
+        gap: 6px;
+      }
+      .deck-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.18);
+        cursor: pointer;
+        border: 0;
+        padding: 0;
+        transition: background 0.15s, width 0.2s;
+      }
+      .deck-dot.is-active {
+        background: var(--primary);
+        width: 22px;
+        border-radius: 999px;
+      }
+      .deck-counter {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--on-surface-variant);
+        min-width: 44px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Persistent header so every slide feels like the Helix product -->
+    <header class="site-header">
+      <div class="site-header-inner">
+        <span class="wordmark">
+          <span class="wordmark-mark"><span class="material-symbols-outlined">genetics</span></span>
+          <span class="wordmark-text">Helix</span>
+        </span>
+        <nav class="topnav">
+          <a href="#">Check</a>
+          <a href="#">About</a>
+          <span class="nav-cta">
+            <span class="nav-cta-dot"></span>
+            Research preview
+          </span>
+        </nav>
+      </div>
+    </header>
+
+    <main class="deck">
+      <!-- Slide 1 — Cover -->
+      <section class="slide is-active" data-slide="1">
+        <div class="slide-inner">
+          <p class="eyebrow">Helix · Research Preview · 2026</p>
+          <h1 class="display-title">Before you believe, <em>let's verify together.</em></h1>
+          <p class="display-subtitle">An agentic health fact-checker that turns any URL, screenshot, or claim into a sourced verdict — powered by <em>Gemma 4</em>.</p>
+        </div>
+      </section>
+
+      <!-- Slide 2 — The problem (constat) -->
+      <section class="slide" data-slide="2">
+        <div class="slide-inner">
+          <p class="eyebrow">The problem</p>
+          <h2 class="display-title">The lie travels <em>faster than the fact-check.</em></h2>
+          <p class="display-subtitle">Health misinformation is, per the WHO, one of the leading public-health threats of the 2020s. By the time a viral video is debunked, it has already shaped what millions believe — and the cost is measurable.</p>
+          <div class="stat-footnote">
+            <p class="stat-footnote-number">318,000<span class="stat-suffix">+</span></p>
+            <p class="stat-footnote-text"><em>preventable deaths</em> in the U.S. linked to anti-vaccine content during COVID-19.</p>
+            <p class="stat-citation">Yale School of Public Health · 2022</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 — Who is most exposed -->
+      <section class="slide" data-slide="3">
+        <div class="slide-inner">
+          <p class="eyebrow">Who's most exposed</p>
+          <h2 class="display-title">The people most exposed to viral health lies are <em>least likely to open a chatbot.</em></h2>
+          <div class="pill-row">
+            <span class="pill-chip"><span class="material-symbols-outlined">chat</span>Older adults on WhatsApp</span>
+            <span class="pill-chip"><span class="material-symbols-outlined">public</span>Rural communities on Facebook</span>
+            <span class="pill-chip"><span class="material-symbols-outlined">music_note</span>Diaspora groups on TikTok</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 — Why existing tools fail -->
+      <section class="slide" data-slide="4">
+        <div class="slide-inner">
+          <p class="eyebrow">Why existing tools fall short</p>
+          <h2 class="display-title">Reactive. English-first. <em>They require effort.</em></h2>
+          <p class="display-subtitle">Snopes, HealthFeedback, AFP do excellent work — but they need <em>you</em> to come to them, type in English, and read a long article. By then, the lie has already traveled.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5 — What we built (solution intro) -->
+      <section class="slide" data-slide="5">
+        <div class="slide-inner">
+          <p class="eyebrow">What we built</p>
+          <h2 class="display-title">One URL in. <em>Sourced verdicts out.</em></h2>
+          <div class="pipeline-row">
+            <div class="pipeline-card">
+              <span class="material-symbols-outlined">link</span>
+              <p class="pipeline-card-label">Step 1</p>
+              <p class="pipeline-card-title">Ingest</p>
+            </div>
+            <span class="pipeline-arrow material-symbols-outlined">arrow_forward</span>
+            <div class="pipeline-card">
+              <span class="material-symbols-outlined">workspaces</span>
+              <p class="pipeline-card-label">Step 2</p>
+              <p class="pipeline-card-title">Investigate</p>
+            </div>
+            <span class="pipeline-arrow material-symbols-outlined">arrow_forward</span>
+            <div class="pipeline-card">
+              <span class="material-symbols-outlined">verified</span>
+              <p class="pipeline-card-label">Step 3</p>
+              <p class="pipeline-card-title">Verdict</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 — Platform-feel: input form -->
+      <section class="slide" data-slide="6">
+        <div class="slide-inner">
+          <div class="helix-check-intro">
+            <h2 class="helix-title-card">Before you believe, <em>let's verify together.</em></h2>
+            <p class="helix-intro-text">Paste the link to a video or article, or write down the claim you've read. Helix cross-references it against <em>the WHO</em>, <em>PubMed</em> and <em>Google Fact Check</em>.</p>
+          </div>
+          <form class="helix-card" onsubmit="event.preventDefault()">
+            <div class="helix-card-head">
+              <div class="helix-tabs">
+                <button type="button" class="helix-tab is-active"><span class="material-symbols-outlined">link</span>URL</button>
+                <button type="button" class="helix-tab"><span class="material-symbols-outlined">edit_note</span>Written claim</button>
+                <button type="button" class="helix-tab"><span class="material-symbols-outlined">image</span>Screenshot</button>
+              </div>
+            </div>
+            <div class="helix-input-wrap">
+              <span class="helix-detect-chip"><span class="material-symbols-outlined">check_circle</span>TikTok</span>
+              <input class="helix-input" value="https://www.tiktok.com/@drclaim/video/7345…" readonly />
+            </div>
+            <div class="link-preview">
+              <div class="link-preview-thumb"><span class="material-symbols-outlined">play_circle</span></div>
+              <div class="link-preview-body">
+                <span class="preview-kicker"><span class="material-symbols-outlined">smart_display</span>TikTok</span>
+                <span class="preview-title">Magnesium cures anxiety in two weeks — Dr. Claim</span>
+                <span class="preview-desc">@drclaim · 1.2M views · 28s</span>
+              </div>
+            </div>
+            <div class="helix-card-foot">
+              <span class="source-dots">
+                <span><i></i>WHO</span>
+                <span><i></i>PubMed</span>
+                <span><i></i>Google Fact Check</span>
+              </span>
+              <button type="button" class="helix-launch">Run analysis<span class="material-symbols-outlined">arrow_forward</span></button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Slide 7 — Platform-feel: agent loader -->
+      <section class="slide" data-slide="7">
+        <div class="slide-inner">
+          <div class="agent-stack">
+            <p class="eyebrow" style="margin-bottom:8px;">Investigation in progress</p>
+            <h2 class="helix-title-card" style="font-size:32px;margin-bottom:6px;">Manager extracts the claim. <em>Investigator gathers the evidence.</em></h2>
+            <p>~12 seconds end-to-end.</p>
+            <div class="agent-plan">
+              <div class="agent-plan-step done">
+                <div class="agent-plan-icon"><span class="material-symbols-outlined">download</span></div>
+                <div>
+                  <strong>Ingest TikTok audio</strong>
+                  <div class="agent-plan-detail">Gemma 4 E4B transcribed 28 seconds of speech locally.</div>
+                </div>
+                <span class="agent-plan-badge">Done</span>
+              </div>
+              <div class="agent-plan-step done">
+                <div class="agent-plan-icon"><span class="material-symbols-outlined">edit_note</span></div>
+                <div>
+                  <strong>Manager identifies the claim</strong>
+                  <div class="agent-plan-detail">"Magnesium cures anxiety in two weeks."</div>
+                </div>
+                <span class="agent-plan-badge">Done</span>
+              </div>
+              <div class="agent-plan-step active">
+                <div class="agent-plan-icon"><span class="material-symbols-outlined">workspaces</span></div>
+                <div>
+                  <strong>Investigator queries 3 sources</strong>
+                  <div class="agent-plan-detail">PubMed abstracts · WHO/CDC mythbusters · Google Fact Check Tools…</div>
+                </div>
+                <span class="agent-plan-badge">Running</span>
+              </div>
+              <div class="agent-plan-step pending">
+                <div class="agent-plan-icon"><span class="material-symbols-outlined">verified</span></div>
+                <div>
+                  <strong>Compose verdict</strong>
+                  <div class="agent-plan-detail">Stance · score · narrative with citations.</div>
+                </div>
+                <span class="agent-plan-badge">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 — Platform-feel: verdict result -->
+      <section class="slide" data-slide="8">
+        <div class="slide-inner">
+          <p class="eyebrow" style="text-align:center;">Verdict · 11.4 s</p>
+          <div class="verdict-shell">
+            <article class="claim-card glass-card">
+              <span class="band-pill"><span class="material-symbols-outlined fill">cancel</span>Contradicted</span>
+              <h3 class="claim-title">"Magnesium cures anxiety in two weeks."</h3>
+              <p class="claim-narrative">No peer-reviewed trial supports a 2-week curative effect. Recent RCTs report a modest, inconsistent reduction in anxiety symptoms only at supplemental doses, with no claim of "cure". WHO and Google Fact Check flag the phrasing as misleading.</p>
+              <div class="veracity-scale">
+                <div class="veracity-labels"><span>False</span><span>Mixed</span><span>True</span></div>
+                <div class="veracity-bar">
+                  <div class="veracity-cursor"></div>
+                </div>
+              </div>
+            </article>
+            <div class="source-list">
+              <article class="source-card glass-card">
+                <div class="source-card-head">
+                  <span class="material-symbols-outlined">menu_book</span>
+                  <span class="source-card-name">PubMed</span>
+                  <span class="source-card-badge">Peer-reviewed</span>
+                </div>
+                <p class="source-card-quote">"Effect on anxiety symptoms inconsistent across 8 RCTs; no curative outcome reported." (Boyle et al., 2023)</p>
+              </article>
+              <article class="source-card glass-card">
+                <div class="source-card-head">
+                  <span class="material-symbols-outlined">health_and_safety</span>
+                  <span class="source-card-name">WHO / CDC</span>
+                  <span class="source-card-badge">High authority</span>
+                </div>
+                <p class="source-card-quote">No WHO mythbuster directly matches. CDC: no clinical endorsement of magnesium as a treatment for anxiety disorders.</p>
+              </article>
+              <article class="source-card glass-card">
+                <div class="source-card-head">
+                  <span class="material-symbols-outlined">verified</span>
+                  <span class="source-card-name">Google Fact Check</span>
+                  <span class="source-card-badge">Cross-referenced</span>
+                </div>
+                <p class="source-card-quote">HealthFeedback: "Misleading — magnesium is not a substitute for evidence-based anxiety treatment."</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9 — Sources / grounded in evidence -->
+      <section class="slide" data-slide="9">
+        <div class="slide-inner">
+          <p class="eyebrow">Grounded in evidence</p>
+          <h2 class="display-title">The model reads. <em>It doesn't recall.</em></h2>
+          <p class="display-subtitle">Every verdict is built from sources the Investigator queries <em>at runtime</em> — not from the model's training data.</p>
+          <div class="logo-row">
+            <span class="logo-pill">
+              <span class="material-symbols-outlined">menu_book</span>
+              <span class="logo-pill-text"><strong>PubMed</strong><span>Peer-reviewed</span></span>
+            </span>
+            <span class="logo-pill">
+              <span class="material-symbols-outlined">health_and_safety</span>
+              <span class="logo-pill-text"><strong>WHO / CDC</strong><span>High authority</span></span>
+            </span>
+            <span class="logo-pill">
+              <span class="material-symbols-outlined">verified</span>
+              <span class="logo-pill-text"><strong>Google Fact Check</strong><span>Cross-referenced</span></span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 — Closing -->
+      <section class="slide" data-slide="10">
+        <div class="slide-inner">
+          <p class="eyebrow">Helix · Research preview · 2026</p>
+          <p class="closing-mark">Helix</p>
+          <h2 class="display-title" style="font-size: clamp(34px, 4vw, 56px);">Health misinformation kills. <em>Verification doesn't have to.</em></h2>
+          <p class="display-subtitle">Submitted to <em>Gemma 4 for Good</em> · github.com/&lt;user&gt;/helix</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Deck nav -->
+    <nav class="deck-nav" aria-label="Slide navigation">
+      <button type="button" id="prev" aria-label="Previous slide"><span class="material-symbols-outlined">arrow_back</span></button>
+      <div class="deck-dots" id="dots"></div>
+      <span class="deck-counter" id="counter">1 / 10</span>
+      <button type="button" id="next" aria-label="Next slide"><span class="material-symbols-outlined">arrow_forward</span></button>
+    </nav>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsHost = document.getElementById('dots');
+      const counter = document.getElementById('counter');
+      const total = slides.length;
+      let index = 0;
+
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'deck-dot';
+        dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        dot.addEventListener('click', () => go(i));
+        dotsHost.appendChild(dot);
+      });
+      const dots = Array.from(dotsHost.children);
+
+      function go(i) {
+        index = Math.max(0, Math.min(total - 1, i));
+        slides.forEach((s, j) => s.classList.toggle('is-active', j === index));
+        dots.forEach((d, j) => d.classList.toggle('is-active', j === index));
+        counter.textContent = `${index + 1} / ${total}`;
+        history.replaceState(null, '', `#${index + 1}`);
+      }
+
+      document.getElementById('prev').addEventListener('click', () => go(index - 1));
+      document.getElementById('next').addEventListener('click', () => go(index + 1));
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault();
+          go(index + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          go(index - 1);
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          go(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          go(total - 1);
+        }
+      });
+
+      // Jump to slide N via #N in URL
+      const initial = parseInt((window.location.hash || '#1').slice(1), 10);
+      if (!Number.isNaN(initial) && initial >= 1 && initial <= total) {
+        go(initial - 1);
+      } else {
+        go(0);
+      }
+    </script>
+  </body>
+</html>

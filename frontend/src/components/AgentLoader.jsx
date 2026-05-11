@@ -2,25 +2,42 @@ import { useEffect, useRef, useState } from 'react';
 
 function extractionPlan(hasUrl, hasImage) {
   const sourceStep = hasImage
-    ? { title: 'Reading image input', detail: 'Preparing the screenshot for the Manager.', tools: ['vision', 'manager'] }
+    ? { title: 'Analysing your image', detail: 'We read the screenshot and extract any health-related text it contains.', icon: 'image' }
     : hasUrl
-      ? { title: 'Fetching source', detail: 'Loading page metadata and readable content.', tools: ['ingestion', 'manager'] }
-      : { title: 'Reading text', detail: 'Sending the claim text to the Manager.', tools: ['manager'] };
+      ? { title: 'Fetching your source', detail: 'We download the article or video and pull out the readable content.', icon: 'cloud_download' }
+      : { title: 'Reading your text', detail: 'We take the claim you typed and prepare it for analysis.', icon: 'description' };
 
   return [
     sourceStep,
-    { title: 'Manager triage', detail: 'Choosing the right ingestion path and health domain.', tools: ['router', 'health-domain'] },
-    { title: 'Claim extraction', detail: 'Identifying the main claim and supporting sub-claims.', tools: ['claim-parser'] },
-    { title: 'Preparing review', detail: 'Formatting editable claims before verification.', tools: ['schema-validator'] },
+    { title: 'Understanding the context', detail: 'We figure out which health topic is involved — nutrition, vaccines, treatments, etc.', icon: 'psychology' },
+    { title: 'Extracting claims', detail: 'We identify the key health claims that can be fact-checked.', icon: 'hub' },
+    { title: 'Preparing your review', detail: 'We format everything so you can confirm or edit the claims before we verify them.', icon: 'fact_check' },
   ];
 }
 
 function verificationPlan(claimCount) {
   return [
-    { title: 'Dispatching investigators', detail: `${claimCount} claim${claimCount === 1 ? '' : 's'} queued for evidence search.`, tools: ['dispatcher'] },
-    { title: 'Querying evidence', detail: 'Checking PubMed, public-health sources, and fact-check databases.', tools: ['PubMed', 'WHO/CDC', 'Fact Check'] },
-    { title: 'Reducing findings', detail: 'Scoring evidence strength and contradictions.', tools: ['evidence-reducer'] },
-    { title: 'Writing verdicts', detail: 'Preparing the cited explanation for each claim.', tools: ['narrative-agent'] },
+    { title: 'Launching investigators', detail: `We spin up one investigator per claim — ${claimCount} running in parallel.`, icon: 'rocket_launch' },
+    { title: 'Searching the evidence', detail: 'Each investigator queries PubMed, the WHO/CDC myth-buster database, and Google Fact Check Tools.', icon: 'travel_explore' },
+    { title: 'Weighing the evidence', detail: 'We score how strong each source is, check for contradictions, and assess consensus.', icon: 'balance' },
+    { title: 'Writing the verdicts', detail: 'We summarise the findings into a clear, sourced verdict for each claim.', icon: 'edit_note' },
+  ];
+}
+
+function directCheckPlan(hasUrl, hasImage) {
+  const sourceStep = hasImage
+    ? { title: 'Reading your image', detail: 'We extract any health-related text from the screenshot.', icon: 'image' }
+    : hasUrl
+      ? { title: 'Fetching your source', detail: 'We download the article or video and pull out the readable content.', icon: 'cloud_download' }
+      : { title: 'Reading your text', detail: 'We take the claim you typed and prepare it for analysis.', icon: 'description' };
+
+  return [
+    sourceStep,
+    { title: 'Identifying the main claim', detail: 'We isolate the single most important health claim worth fact-checking.', icon: 'hub' },
+    { title: 'Querying PubMed', detail: 'We search peer-reviewed studies, meta-analyses, and clinical trials.', icon: 'menu_book' },
+    { title: 'Checking WHO, CDC and fact-checkers', detail: 'We cross-reference public-health authorities and the global fact-checking network.', icon: 'health_and_safety' },
+    { title: 'Weighing the evidence', detail: 'We score the quality of each source, check for contradictions, and assess consensus.', icon: 'balance' },
+    { title: 'Writing the verdict and editorial take', detail: 'We summarise everything into a clear, sourced verdict — and an editorial opinion of the content as a whole.', icon: 'edit_note' },
   ];
 }
 
@@ -55,8 +72,17 @@ export function useAgentPlan() {
 
   useEffect(() => {
     if (status !== 'running' || activeIndex >= plan.length - 1) return;
-    const delays = [1200, 3200, 4800, 2400, 3600, 2000];
-    const delay = delays[activeIndex] || 2800;
+    // Per-step time ranges (ms). Each step picks a uniformly-random value in its window.
+    const ranges = [
+      [3500, 6500],   // ingest / read source
+      [4000, 8000],   // map context
+      [6000, 11000],  // extract / search
+      [3000, 5500],   // wrap-up
+      [4500, 8000],   // overflow buffers for longer plans
+      [2500, 4500],
+    ];
+    const [lo, hi] = ranges[activeIndex] || [3000, 5500];
+    const delay = lo + Math.random() * (hi - lo);
     timerRef.current = setTimeout(() => {
       setActiveIndex((i) => i + 1);
     }, delay);
@@ -67,83 +93,137 @@ export function useAgentPlan() {
     plan, activeIndex, status,
     startExtraction: (hasUrl, hasImage) => start(extractionPlan(hasUrl, hasImage)),
     startVerification: (count) => start(verificationPlan(count)),
+    startDirectCheck: (hasUrl, hasImage) => start(directCheckPlan(hasUrl, hasImage)),
     complete, fail,
   };
 }
 
-export default function AgentLoader({ message, plan, activeIndex, status }) {
-  const progress = plan.length > 0 ? Math.min(100, ((Math.min(activeIndex + 1, plan.length)) / plan.length) * 100) : 30;
+const SOURCE_LABEL = {
+  article: 'Article',
+  youtube: 'YouTube transcript',
+  tiktok: 'TikTok audio',
+  claim: 'Your claim',
+  image: 'Screenshot',
+};
+
+function ScanningPanel({ active, plan, activeIndex, status, source }) {
+  const total = plan.length || 1;
+  const currentStep = plan[Math.min(activeIndex, total - 1)];
+  const completed = status === 'done' ? total : Math.min(activeIndex, total);
+  const progressPct = (completed / total) * 100;
+  const stepNumber = Math.min(activeIndex + 1, total);
+
+  const hasSource = source && (source.text || source.kind === 'image');
+  const label = hasSource ? (SOURCE_LABEL[source.kind] || 'Source') : 'Source';
+  // Cap how much we render so very long transcripts stay readable.
+  const body = source?.text ? source.text.slice(0, 4000) : '';
 
   return (
-    <section className="state-card agent-loading">
-      <div className="reactor-core">
-        <div className="reactor-ring reactor-ring-1" />
-        <div className="reactor-ring reactor-ring-2" />
-        <div className="reactor-ring reactor-ring-3" />
-        <div className="reactor-glow">
-          <div className="reactor-center">
-            <svg className="reactor-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v4" /><path d="M6.34 6.34l2.83 2.83" /><path d="M2 12h4" />
-              <path d="M17.66 6.34l-2.83 2.83" /><path d="M22 12h-4" />
-              <circle cx="12" cy="12" r="4" /><path d="M12 16v6" /><path d="M9 22h6" />
-            </svg>
-          </div>
+    <div className="scanning-panel glass-card">
+      <header className="scanning-panel-head">
+        <div className="scanning-panel-meta">
+          <span className="material-symbols-outlined sm" aria-hidden="true">description</span>
+          <span>{label}</span>
         </div>
-        <div className="reactor-particles" aria-hidden="true">
-          <span className="particle p-icon" style={{ '--delay': '0s', '--start-x': '-20%', '--start-y': '20%' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
-          </span>
-          <span className="particle p-text" style={{ '--delay': '0.3s', '--start-x': '120%', '--start-y': '30%' }}>PUBMED</span>
-          <span className="particle p-icon" style={{ '--delay': '0.6s', '--start-x': '-15%', '--start-y': '60%' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-          </span>
-          <span className="particle p-text" style={{ '--delay': '0.9s', '--start-x': '115%', '--start-y': '70%' }}>WHO</span>
-          <span className="particle p-icon" style={{ '--delay': '1.2s', '--start-x': '120%', '--start-y': '15%' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-          </span>
-          <span className="particle p-text" style={{ '--delay': '1.5s', '--start-x': '-10%', '--start-y': '80%' }}>FACTS</span>
-        </div>
+        <span className="scanning-panel-page">Step {stepNumber} / {total}</span>
+      </header>
+      <div className="scanning-panel-body">
+        {active && <div className="scanning-beam" aria-hidden="true" />}
+        {hasSource && source.title && (
+          <p className="scanning-line"><strong>{source.title}</strong></p>
+        )}
+        {hasSource && body && (
+          <p className="scanning-line scanning-line--body">{body}</p>
+        )}
+        {!hasSource && (
+          <>
+            <div className="scanning-skeleton skeleton-w-3" />
+            <div className="scanning-skeleton skeleton-w-full" />
+            <div className="scanning-skeleton skeleton-w-2" />
+            <p className="scanning-line">Fetching the source…</p>
+          </>
+        )}
+        {source?.kind === 'image' && (
+          <p className="scanning-line">Reading the screenshot with native vision…</p>
+        )}
       </div>
-      <div className="agent-loading-body">
-        <div className="agent-loading-head">
-          <div>
-            <p>{message}</p>
-            <span>Live agent plan</span>
-          </div>
+      <footer className="scanning-panel-foot">
+        <div>
+          <span className="scanning-panel-meta-label">Currently</span>
+          <span className="scanning-panel-meta-value">
+            {currentStep ? currentStep.title : '—'}
+          </span>
         </div>
-        <ol className="agent-plan" aria-label="Agent progress">
+        <div className="scanning-progress" aria-label={`Progress: ${Math.round(progressPct)}%`}>
+          <div className="scanning-progress-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default function AgentLoader({ message, plan, activeIndex, status, source }) {
+  return (
+    <section className="agent-loader">
+      <header className="agent-loader-head">
+        <div className="agent-loader-pill">
+          <span className="agent-loader-pulse" aria-hidden="true" />
+          <span>{status === 'error' ? 'Analysis interrupted' : 'Analysis in progress'}</span>
+        </div>
+        <h2>{message || 'Working on it'}</h2>
+        <p>
+          Helix orchestrates several agents — they read the source, identify the claims,
+          and cross-reference each one against scientific literature.
+        </p>
+        <p className="agent-loader-eta">
+          <span className="material-symbols-outlined sm" aria-hidden="true">schedule</span>
+          This usually takes between 30 seconds and 1 min 30.
+        </p>
+      </header>
+
+      <div className="agent-loader-grid">
+        <ScanningPanel
+          active={status === 'running'}
+          plan={plan}
+          activeIndex={activeIndex}
+          status={status}
+          source={source}
+        />
+
+        <ol className="agent-plan" aria-label="Agent progress" aria-live="polite">
           {plan.map((step, i) => {
             let state = 'pending';
             if (status === 'error' && i === activeIndex) state = 'error';
             else if (i < activeIndex || status === 'done') state = 'done';
             else if (i === activeIndex && status === 'running') state = 'active';
 
+            const stateIcon = {
+              done: 'check_circle',
+              active: step.icon || 'sync',
+              error: 'error',
+              pending: step.icon || 'radio_button_unchecked',
+            }[state];
+
             return (
-              <li key={i} className="agent-plan-step" data-state={state}>
-                <span className="agent-plan-marker" aria-hidden="true">
-                  {state === 'done' ? '✓' : state === 'active' ? '•' : ''}
+              <li key={i} className="agent-plan-step glass-card" data-state={state}>
+                <span className={`agent-plan-icon agent-plan-icon--${state}`} aria-hidden="true">
+                  <span className={`material-symbols-outlined${state === 'done' || state === 'error' ? ' fill' : ''}`}>
+                    {stateIcon}
+                  </span>
                 </span>
                 <div className="agent-plan-body">
                   <div className="agent-plan-row">
                     <strong>{step.title}</strong>
-                    <span className="agent-plan-badge">
+                    <span className={`agent-plan-badge agent-plan-badge--${state}`}>
                       {state === 'done' ? 'done' : state === 'active' ? 'running' : state === 'error' ? 'error' : 'queued'}
                     </span>
                   </div>
                   <span className="agent-plan-detail">{step.detail}</span>
-                  {step.tools?.length > 0 && (
-                    <div className="agent-tools">
-                      {step.tools.map((t) => <span key={t}>{t}</span>)}
-                    </div>
-                  )}
                 </div>
               </li>
             );
           })}
         </ol>
-        <div className="reactor-progress">
-          <div className="reactor-progress-bar" style={{ width: `${status === 'done' ? 100 : progress}%` }} />
-        </div>
       </div>
     </section>
   );

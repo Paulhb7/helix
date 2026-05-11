@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from beacon.schemas import AgentFinding, CheckRequest, CheckResponse, Claim, ClaimResult, Source, Verdict
+from helix.schemas import AgentFinding, CheckRequest, CheckResponse, Claim, ClaimResult, Source, Verdict
 
 
 def test_check_request_accepts_empty_payload_for_api_level_validation() -> None:

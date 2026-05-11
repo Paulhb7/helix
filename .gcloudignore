@@ -1,0 +1,65 @@
+# .gcloudignore — controls what `gcloud builds submit` uploads.
+# Mirrors .gitignore for noise.
+
+# VCS / dotfiles
+.git/
+.gitignore
+.gcloudignore
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Frontend build output (rebuilt inside Docker)
+frontend/dist/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local runtime artefacts
+data/
+!frontend/src/data/
+tmp/
+temp/
+downloads/
+uploads/
+transcripts/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# Heavy media (keep the landing video which Vite needs)
+*.mp3
+*.mp4
+!frontend/public/animated.mp4
+*.m4a
+*.wav
+*.webm
+
+# Local-only docs not for the repo (we still want them in the build context though?
+# Currently no — they're just docs, no need on Cloud Build)
+SUBMISSION.md
+DEV.md
+hackathon_rules.md
+CLAUDE.md

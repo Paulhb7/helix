@@ -1,141 +1,122 @@
-import { useCallback, useRef, useState } from 'react';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Landing from './components/Landing';
-import CheckForm from './components/CheckForm';
-import AgentLoader, { useAgentPlan } from './components/AgentLoader';
-import ClaimReview from './components/ClaimReview';
-import Results from './components/Results';
+import CheckPage from './components/CheckPage';
 import About from './components/About';
+import Methodology from './components/Methodology';
 import Footer from './components/Footer';
-import { extractClaims, verifyClaims, fileToBase64 } from './api/beacon';
+import FormerReport from './components/FormerReport';
+import FormerReportsPage from './components/FormerReportsPage';
+import HelixDecoration from './components/HelixDecoration';
 
-const URL_RE = /^https?:\/\//i;
-
-export default function App() {
-  const [view, setView] = useState('landing');
-  const [step, setStep] = useState('form');
-  const [claims, setClaims] = useState([]);
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [loadingMsg, setLoadingMsg] = useState('');
-  const lastNonAbout = useRef('landing');
-  const agentPlan = useAgentPlan();
-
-  const navigate = useCallback((target) => {
-    if (target === 'about') {
-      lastNonAbout.current = view;
-      setView('about');
-    } else if (target === 'back') {
-      setView(lastNonAbout.current);
-    } else {
-      setView(target);
-      if (target !== 'about') lastNonAbout.current = target;
-    }
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [view]);
-
-  async function handleExtract({ text, file }) {
-    if (!text && !file) {
-      setError('Type a claim, paste a URL, or attach an image.');
-      setStep('error');
-      return;
-    }
-
-    const body = {};
-    if (text) {
-      if (URL_RE.test(text)) body.url = text;
-      else body.text = text;
-    }
-    if (file) body.image_b64 = await fileToBase64(file);
-
-    setLoadingMsg(body.url ? 'Manager fetching content + identifying claims...' : 'Manager identifying claims...');
-    agentPlan.startExtraction(Boolean(body.url), Boolean(body.image_b64));
-    setStep('loading');
-    setLoading(true);
-    setError('');
-
-    try {
-      const data = await extractClaims(body);
-      agentPlan.complete();
-      setClaims(data.claims || []);
-      setStep('review');
-    } catch (err) {
-      agentPlan.fail();
-      setError(err.message || String(err));
-      setStep('error');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleVerify(validClaims) {
-    setLoadingMsg(`Dispatching ${validClaims.length} Investigator${validClaims.length === 1 ? '' : 's'}...`);
-    agentPlan.startVerification(validClaims.length);
-    setStep('loading');
-    setLoading(true);
-    setError('');
-
-    try {
-      const data = await verifyClaims(validClaims);
-      agentPlan.complete();
-      setResults(data);
-      setStep('results');
-    } catch (err) {
-      agentPlan.fail();
-      setError(err.message || String(err));
-      setStep('error');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (view === 'about') {
-    return (
-      <>
-        <Header onNavigate={navigate} />
-        <main>
-          <About onBack={() => navigate('back')} />
-        </main>
-        <Footer />
-      </>
-    );
-  }
-
-  if (view === 'landing') {
-    return (
-      <>
-        <Landing onStart={() => setView('app')} />
-      </>
-    );
-  }
-
+function LandingRoute() {
+  const navigate = useNavigate();
   return (
     <>
-      <Header onNavigate={navigate} />
-      <main>
+      <Header />
+      <Landing onStart={() => navigate('/check')} />
+    </>
+  );
+}
+
+function CheckRoute() {
+  return (
+    <>
+      <Header />
+      <main className="has-helix-bg">
+        <HelixDecoration />
+        <CheckPage />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function AboutRoute() {
+  return (
+    <>
+      <Header />
+      <main className="has-helix-bg">
+        <HelixDecoration />
+        <About />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function MethodologyRoute() {
+  const navigate = useNavigate();
+  return (
+    <>
+      <Header />
+      <main className="has-helix-bg">
+        <HelixDecoration />
+        <Methodology onBack={() => navigate(-1)} />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function ReportRoute() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  return (
+    <>
+      <Header />
+      <main className="has-helix-bg">
+        <HelixDecoration />
         <div className="app-view">
-          {step === 'form' && <CheckForm onSubmit={handleExtract} disabled={loading} />}
-          {step === 'loading' && (
-            <AgentLoader
-              message={loadingMsg}
-              plan={agentPlan.plan}
-              activeIndex={agentPlan.activeIndex}
-              status={agentPlan.status}
-            />
-          )}
-          {step === 'error' && (
-            <section className="state-card error">{error}</section>
-          )}
-          {step === 'review' && (
-            <ClaimReview initialClaims={claims} onVerify={handleVerify} />
-          )}
-          {step === 'results' && results && (
-            <Results results={results.results} elapsedSeconds={results.elapsed_seconds} />
-          )}
+          <FormerReport id={id} onBack={() => navigate('/reports')} />
         </div>
       </main>
       <Footer />
     </>
+  );
+}
+
+function ReportsRoute() {
+  const navigate = useNavigate();
+  return (
+    <>
+      <Header />
+      <main className="has-helix-bg">
+        <HelixDecoration />
+        <div className="app-view">
+          <FormerReportsPage
+            onOpen={(id) => navigate(`/reports/${id}`)}
+            onBack={() => navigate('/check')}
+          />
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<LandingRoute />} />
+        <Route path="/check" element={<CheckRoute />} />
+        <Route path="/about" element={<AboutRoute />} />
+        <Route path="/methodology" element={<MethodologyRoute />} />
+        <Route path="/reports" element={<ReportsRoute />} />
+        <Route path="/reports/:id" element={<ReportRoute />} />
+        <Route path="*" element={<LandingRoute />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

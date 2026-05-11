@@ -12,8 +12,12 @@ export default function LinkPreview({ status, data, error, url }) {
   if (status === 'loading') {
     return (
       <div className="link-preview is-loading">
+        <span className="scanning-beam" aria-hidden="true" />
         <div className="preview-meta">
-          <span className="preview-kicker">Link preview</span>
+          <span className="preview-kicker">
+            <span className="material-symbols-outlined sm" aria-hidden="true">link</span>
+            Reading link
+          </span>
           <p className="preview-title">{hostnameFor(url)}</p>
           <p className="preview-desc">Fetching page details...</p>
         </div>
@@ -25,9 +29,12 @@ export default function LinkPreview({ status, data, error, url }) {
     return (
       <div className="link-preview is-error">
         <div className="preview-meta">
-          <span className="preview-kicker">Preview unavailable</span>
+          <span className="preview-kicker">
+            <span className="material-symbols-outlined sm" aria-hidden="true">error</span>
+            Preview unavailable
+          </span>
           <p className="preview-title">{hostnameFor(url)}</p>
-          <p className="preview-desc">{error || 'Beacon can still analyze this link.'}</p>
+          <p className="preview-desc">{error || 'Helix can still analyze this link.'}</p>
         </div>
       </div>
     );

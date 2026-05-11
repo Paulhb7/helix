@@ -1,89 +1,109 @@
-const PIPELINE_STEPS = [
-  {
-    title: 'Extract the claim',
-    desc: 'Gemma 4 (E2B, fast tier) reads the input — text, URL, or screenshot — and produces a single atomic English claim suitable for retrieval.',
-  },
-  {
-    title: 'Fan out across the literature',
-    desc: 'Three sub-agents query independent evidence bases concurrently: PubMed (peer-reviewed research), WHO & CDC mythbusters (public-health authorities), and Google Fact Check Tools (HealthFeedback, Snopes, Lead Stories, Politifact health).',
-  },
-  {
-    title: 'Construct the verdict',
-    desc: 'The Investigator assembles validated findings into one of five verdict bands, with a signed score and a short explanation. The roadmap is to move this band and score calculation into deterministic Python.',
-  },
-  {
-    title: 'Explain in plain language',
-    desc: 'The narrative summarizes the cited sources in the user\'s language without giving medical advice. Every link in the evidence list is clickable.',
-  },
-];
+import { Link } from 'react-router-dom';
 
-export default function About({ onBack }) {
+export default function About() {
   return (
-    <section className="about-view">
-      <header className="about-head">
-        <p className="kicker">How it works</p>
-        <h2>A passive fact-checker for health claims, grounded in the published record.</h2>
-        <p className="about-lede">
-          Beacon takes any claim — a sentence, a screenshot, a YouTube link — and runs it through
-          three evidence sources. The current prototype uses validated tool outputs plus an
-          Investigator LLM to choose the verdict band, score, and explanation. A deterministic
-          Python combiner is the next reliability step.
-        </p>
-      </header>
+    <section className="vision-view">
+      {/* Hero */}
+      <section className="vision-hero">
+        <div className="vision-hero-text">
+          <div className="about-pill">
+            <span className="material-symbols-outlined sm" aria-hidden="true">biotech</span>
+            <span>Our mission</span>
+          </div>
+          <h1 className="vision-hero-title">
+            Restoring trust in medical science through clarity.
+          </h1>
+          <p className="vision-hero-lede">
+            In an era of overwhelming information, Helix provides a transparent, scientifically
+            rigorous foundation for health claims. We untangle complex data to reveal the
+            biological truth, blending advanced AI extraction with peer-reviewed certainty.
+          </p>
+          <div className="vision-hero-actions">
+            <Link to="/check" className="btn-primary">
+              <span className="material-symbols-outlined sm" aria-hidden="true">arrow_forward</span>
+              Try Helix
+            </Link>
+            <Link to="/methodology" className="btn-secondary">
+              <span className="material-symbols-outlined sm" aria-hidden="true">science</span>
+              See the methodology
+            </Link>
+          </div>
+        </div>
+        <div className="vision-hero-visual">
+          <div className="vision-hero-glow" aria-hidden="true" />
+          <video
+            className="vision-hero-image"
+            src="/animated.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-hidden="true"
+          />
+        </div>
+      </section>
 
-      <ol className="pipeline">
-        {PIPELINE_STEPS.map((s, i) => (
-          <li key={i}>
-            <span className="step">{i + 1}</span>
-            <div>
-              <h3>{s.title}</h3>
-              <p>{s.desc}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      {/* Our Story */}
+      <section className="vision-story">
+        <div className="vision-story-inner">
+          <h2 className="vision-section-title">Our story</h2>
+          <article className="vision-story-card glass-card">
+            <p>
+              Helix was born from a critical realization: the gap between rigorous medical
+              research and public understanding was growing dangerously wide. While scientists
+              published peer-reviewed facts, the open web amplified sensationalism — often faster
+              than corrections could catch up.
+            </p>
+            <p>
+              We assembled a small team of researchers, technologists, and designers to build a
+              bridge. By orchestrating language models against authoritative databases like
+              PubMed, the WHO, and the global fact-checking network, we built a tool that
+              doesn&apos;t just say what is true — it shows you the exact strand of evidence that
+              proves it.
+            </p>
+          </article>
+        </div>
+      </section>
 
-      <div className="about-grid">
-        <article className="info-card">
-          <h3>Verdict bands</h3>
-          <ul className="band-list">
-            <li><span className="band supported">Supported</span><p>Multiple high-quality sources agree with the claim.</p></li>
-            <li><span className="band partial">Partially supported</span><p>Core element supported; framing or causality overstated.</p></li>
-            <li><span className="band insufficient">Insufficient evidence</span><p>No clear consensus in the literature.</p></li>
-            <li><span className="band contradicted">Contradicted</span><p>Claim contradicts one or more high-quality sources.</p></li>
-            <li><span className="band misinfo">Known misinformation</span><p>On the WHO Mythbusters list or already formally fact-checked.</p></li>
-          </ul>
-        </article>
-
-        <article className="info-card">
-          <h3>Privacy by design</h3>
-          <p>Beacon can run the reasoning model locally through Ollama, or use Google AI Studio when configured with an API key. Local mode keeps model inference on your machine.</p>
-          <p>Evidence lookup may still contact public APIs such as PubMed E-utils and Google Fact Check Tools. The WHO/CDC mythbuster matcher uses a curated list shipped with the repo.</p>
-        </article>
-
-        <article className="info-card">
-          <h3>What Beacon doesn&apos;t do</h3>
-          <p>Beacon evaluates <strong>public claims about health</strong>, not individuals. It does not look at symptoms, test results, or medical records. It is not a medical device and never replaces a clinician.</p>
-          <p>A <em>Contradicted</em> verdict on a viral video is not a treatment recommendation. When in doubt, talk to a qualified health professional.</p>
-        </article>
-
-        <article className="info-card">
-          <h3>Built on</h3>
-          <p><strong>Gemma 4</strong> — configured through LiteLLM, either locally via Ollama or through Google AI Studio.</p>
-          <p><strong>Google ADK</strong> — Sequential and Parallel agent orchestration with native function calling.</p>
-          <p><strong>Public scientific infrastructure</strong> — PubMed, the WHO, the CDC, and the global fact-checking network.</p>
-        </article>
-      </div>
-
-      <div className="about-foot">
-        <button type="button" className="btn-enter" onClick={onBack}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="12 19 5 12 12 5" />
-            <line x1="19" y1="12" x2="5" y2="12" />
+      {/* Radical Transparency */}
+      <section className="vision-transparency">
+        <div className="vision-transparency-bg" aria-hidden="true">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M0,0 C30,40 70,60 100,0 L100,100 L0,100 Z" />
           </svg>
-          Back
-        </button>
-      </div>
+        </div>
+        <div className="vision-transparency-inner">
+          <div className="vision-transparency-text">
+            <h2 className="vision-section-title vision-section-title--inverse">
+              Radical transparency
+            </h2>
+            <p>
+              We believe a fact-check is only as good as its sources. That is why every verdict
+              we issue is accompanied by direct links to peer-reviewed studies and authoritative
+              databases. No hidden algorithms, no black boxes — just clear, structured science
+              you can audit.
+            </p>
+            <Link to="/methodology" className="vision-transparency-link">
+              <span>Read the methodology</span>
+              <span className="material-symbols-outlined sm" aria-hidden="true">arrow_forward</span>
+            </Link>
+          </div>
+          <div className="vision-truth-scale">
+            <p className="vision-truth-scale-label">The truth scale</p>
+            <div className="vision-truth-bar">
+              <div className="vision-truth-bar-track truth-gradient" />
+              <div className="vision-truth-bar-cursor" style={{ left: '85%' }}>
+                <div className="vision-truth-bar-dot" />
+              </div>
+            </div>
+            <div className="vision-truth-scale-legend">
+              <span>False</span>
+              <span>Mixed</span>
+              <span className="vision-truth-scale-legend--active">Verified</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </section>
   );
 }

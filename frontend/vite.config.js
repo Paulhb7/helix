@@ -6,11 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/extract': 'http://localhost:8003',
-      '/verify': 'http://localhost:8003',
       '/check': 'http://localhost:8003',
+      '/ingest': 'http://localhost:8003',
       '/preview': 'http://localhost:8003',
-      '/healthz': 'http://localhost:8003',
+      '/health': 'http://localhost:8003',
+      '/mode': 'http://localhost:8003',
     },
   },
 })

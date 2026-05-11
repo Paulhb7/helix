@@ -75,6 +75,7 @@ logs/
 
 # Local runtime artifacts
 data/
+!frontend/src/data/
 tmp/
 temp/
 downloads/
@@ -84,6 +85,7 @@ transcripts/
 # Media generated during ingestion experiments
 *.mp3
 *.mp4
+!frontend/public/animated.mp4
 *.m4a
 *.wav
 *.webm

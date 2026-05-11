@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchLinkPreview } from '../api/beacon';
+import { fetchLinkPreview } from '../api/helix';
 
 const URL_RE = /https?:\/\/[^\s<>"']+/i;
 const DEBOUNCE_MS = 450;
