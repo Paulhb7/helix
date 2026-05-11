@@ -9,6 +9,7 @@ export default function ScrollExpandHero({
   scrollToExpand,
   textBlend,
   onStart,
+  stats,
 }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
@@ -148,6 +149,35 @@ export default function ScrollExpandHero({
                 </h1>
               </div>
 
+              {stats && stats.length > 0 && (
+                <ul
+                  className="seh-stats"
+                  aria-label="Why this matters"
+                  style={{ opacity: titleFade }}
+                >
+                  {stats.map((s, i) => (
+                    <li key={i} className="seh-stat">
+                      <span className="seh-stat-number">{s.number}</span>
+                      <span className="seh-stat-label">{s.label}</span>
+                      {s.source && (
+                        s.sourceUrl ? (
+                          <a
+                            className="seh-stat-source"
+                            href={s.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {s.source}
+                          </a>
+                        ) : (
+                          <span className="seh-stat-source">{s.source}</span>
+                        )
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               {/* Expanding media */}
               <div
                 className="seh-media-frame"
@@ -189,7 +219,7 @@ export default function ScrollExpandHero({
                 </button>
               )}
 
-              {!mediaFullyExpanded && (
+              {!mediaFullyExpanded && !(stats && stats.length > 0) && (
                 <div
                   className="seh-scroll-hint"
                   style={{ opacity: Math.max(0, 1 - scrollProgress * 2.2) }}
