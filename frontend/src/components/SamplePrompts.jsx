@@ -19,7 +19,7 @@ const TikTokLogo = () => (
 
 const SAMPLES = [
   {
-    prompt: 'https://www.youtube.com/shorts/ry6snF7xcYE',
+    prompt: 'https://www.youtube.com/shorts/UaAhLBqCBbQ',
     label: 'YouTube short',
     Logo: YouTubeLogo,
   },
