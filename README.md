@@ -47,6 +47,10 @@ recall facts from memory.
   returns `no_evidence` and the pipeline still works on PubMed + WHO.
 - This is not medical advice, not a clinical decision tool, and not a medical
   device. Helix evaluates public claims, not patients.
+- Gemma 4 is still a young model and occasionally fails (timeout, malformed
+  tool call, vision hiccup). If video/audio ingestion is the bottleneck, you
+  can fall back to `faster-whisper` for transcription instead of the Gemma 4
+  vision path.
 
 ## Architecture
 
@@ -171,8 +175,3 @@ python -m pytest -q
 
 The `tests/test_e2e.ipynb` notebook drives the full pipeline against a small
 set of claims; it requires a running model backend and is not run in CI.
-
-## License
-
-Helix is a research prototype. Add or update the repository license file
-before publishing or submitting the project.
