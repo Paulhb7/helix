@@ -25,8 +25,9 @@ recall facts from memory.
 - Accepts `text`, `url`, and `image_b64` through `POST /check`.
 - URL ingestion is deterministic and routed by host:
   - Web articles via `trafilatura`.
-  - YouTube via `youtube-transcript-api`, with a `yt-dlp` + `faster-whisper`
-    fallback when captions are missing.
+  - YouTube via `youtube-transcript-api`, with a `yt-dlp` audio-transcription
+    fallback (Gemma 4 E4B audio modality / `faster-whisper`) when captions
+    are missing.
   - TikTok via `yt-dlp` captions, with the same audio-transcription fallback.
 - Image input is read by Gemma 4 vision directly.
 - Identifies the single most important health claim and fact-checks it via
@@ -45,12 +46,13 @@ recall facts from memory.
   from validated tool outputs. The tools themselves are pure Python and tested.
 - The Google Fact Check lookup requires an API key. Without it, that tool
   returns `no_evidence` and the pipeline still works on PubMed + WHO.
+- Gemma 4 is still a young model and occasionally fails (timeout, malformed
+  tool call, vision hiccup). The on-device audio transcription pipeline is
+  built around Gemma 4 E4B's audio modality, with `faster-whisper` available
+  in the same process as a lightweight engine for cold-start-sensitive
+  deployments.
 - This is not medical advice, not a clinical decision tool, and not a medical
   device. Helix evaluates public claims, not patients.
-- Gemma 4 is still a young model and occasionally fails (timeout, malformed
-  tool call, vision hiccup). If video/audio ingestion is the bottleneck, you
-  can fall back to `faster-whisper` for transcription instead of the Gemma 4
-  vision path.
 
 ## Architecture
 
