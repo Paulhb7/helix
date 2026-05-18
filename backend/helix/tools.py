@@ -478,25 +478,24 @@ def _run_gemma_audio_pipeline(audio_path: Path) -> dict:
 
 
 def _transcribe_audio(audio_path: Path, language: str | None = None) -> dict:
-    """Whisper first (with optional language hint), Gemma 4 as last-resort.
+    """Gemma 4 native audio first, lightweight Whisper fallback for cold-starts/OOM.
 
-    Returns {"transcript": str, "engine": "whisper"|"gemma"}. Raises if both
-    engines fail (with the Gemma error message, which is the user-facing one).
+    Returns {"transcript": str, "engine": "gemma"|"whisper"}. Raises if both
+    engines fail.
     """
     try:
-        result = _run_whisper_pipeline(audio_path, language=language)
-        return {"transcript": result["transcript"], "engine": "whisper"}
-    except Exception as whisper_err:  # noqa: BLE001
+        result = _run_gemma_audio_pipeline(audio_path)
+        return {"transcript": result["transcript"], "engine": "gemma"}
+    except Exception as gemma_err:
         try:
-            result = _run_gemma_audio_pipeline(audio_path)
-            return {"transcript": result["transcript"], "engine": "gemma"}
-        except Exception as gemma_err:  # noqa: BLE001
+            result = _run_whisper_pipeline(audio_path, language=language)
+            return {"transcript": result["transcript"], "engine": "whisper"}
+        except Exception as whisper_err:
             raise RuntimeError(
                 f"Audio transcription failed on both engines. "
-                f"whisper: {type(whisper_err).__name__}: {whisper_err}; "
-                f"gemma: {type(gemma_err).__name__}: {gemma_err}"
-            ) from gemma_err
-
+                f"gemma: {type(gemma_err).__name__}: {gemma_err}; "
+                f"whisper fallback: {type(whisper_err).__name__}: {whisper_err}"
+            ) from whisper_err
 
 def analyze_tiktok_audio(url: str) -> dict:
     """Fetch the spoken content of a TikTok video.
